@@ -1,0 +1,286 @@
+----------------------------------------------------------------------
+RUNNING DESCENT WITH THE SIMULEYES VR (TM) STEREOSCOPIC VIEWING SYSTEM
+----------------------------------------------------------------------
+
+by Robert Akka
+12/7/95
+
+Contents
+--------
+A. Introduction
+B. Running Descent With SimulEyes VR
+C. Resolution Modes
+D. Refresh Modes
+E. Improving Performance
+F. PC Operating Systems
+G. Stereoscopic Adjustments
+H. Other Keyboard Functions
+I. Customer Service for the SimulEyes VR Hardware
+
+
+A. Introduction
+---------------
+
+This text provides information and documentation that is
+specific to use of Descent with the StereoGraphics (R) SimulEyes VR
+stereoscopic viewing system.
+
+For information about upgrading a full version of Descent which
+would also support SimulEyes VR, please see the text file,
+ORDERFRM.TXT. When ordering an upgrade to Descent, be sure to
+specify that you want a version that includes support for the
+StereoGraphics SimulEyes VR stereoscopic viewing system.
+
+
+B. Running Descent With SimulEyes VR
+------------------------------------
+
+To run Descent with SimulEyes VR, you must launch Descent from the
+stereoscopic driver, LCDBios. The easiest way to do this is to type
+the following batch command:
+
+  STEREO
+
+which is equivalent to the following command line (capitalization
+does not matter for any command names or command options):
+
+  LCDBIOS /LCDRUN:DESCENT /LCDBIOS /SIMULEYES
+
+The above command line calls the stereoscopic driver, which then
+calls Descent, notifying Descent to use LCDBios functionality, and
+SimulEyes VR stereo support. If you want to use other Descent
+command line options, you may place such options after "STEREO".
+For example, to run Descent with SimulEyes VR, with Descent's music
+toggled off, you could type:
+
+  STEREO /NOMUSIC
+
+Or, you could may edit the "STEREO.BAT" batch file to read:
+
+  LCDBIOS /LCDRUN:DESCENT /LCDBIOS /SIMULEYES /NOMUSIC %1 %2 %3 %4
+
+(The "%1 %2 %3 %4" allows up to four command line options to be
+passed from the batch file command line to the application.)
+
+
+An additional batch file is provided for running Descent with
+SimulEyes VR, in low-resolution mode:
+
+  STEREOLO
+
+This runs Descent at a lower resolution, to improve redraw
+performance (see "Resolution modes" below). This batch command is
+equivalent to the following command line:
+
+  LCDBIOS /LCDRUN:DESCENT /LCDBIOS /SIMULEYES /320x200
+
+
+LCDBIOS may be activated to run at a higher than normal sync rate.
+See "Refresh modes" below for details about this.
+
+
+
+
+C. Resolution Modes
+-------------------
+
+You can run Descent with SimulEyes VR at any of three display
+resolutions:
+
+  320x400 (320x200 per eye view): This is the default resolution
+      when running Descent with the "/simuleyes" command line option,
+      or using the "STEREO" batch command.
+
+  320x200 (320x100 per eye view): This will improve performance,
+      particularly on PCs that use slower 486 processors. To select
+      this option, use the command line option "/320x200" following
+      the "/simuleyes" command line option. This resolution option
+      is activated using the batch command "STEREOLO" (see "Running
+      Descent With SimulEyes VR" above).
+
+  320x100 (320x50 per eye view): This resolution is extremely coarse,
+      and is generally not recommended. To select this option, use
+      the command line option "/320x100" following the "/simuleyes"
+      command line option.
+
+Other resolution modes that work with Descent non-stereoscopically
+are not supported in the SimulEyes VR stereo implementation.
+
+
+D. Refresh Modes
+----------------
+
+When running SimulEyes VR with Descent, the display refreshes at a
+rate of 70 Hz. On some systems, you can run Descent with SimulEyes VR
+at the faster refresh rate of 80 Hz. To do this, insert the command
+line option "/HREFRESH" just after "LCDBIOS" in the command line. For
+example, you might edit STEREO.BAT to read:
+
+  LCDBIOS /HREFRESH /LCDRUN:DESCENT /LCDBIOS /SIMULEYES %1 %2 %3 %4
+
+On some computer systems, this higher refresh rate does not work as
+cleanly as the more standard 70 Hz, so try it using the "/HREFRESH"
+command line option, and if that doesn't work as well, go back to
+using the default 70 Hz refresh.
+
+Note that this will not speed up animation rendering or alter the
+pacing of the game. The only difference will be a slight reduction
+of flicker effect when using the SimulEyes VR stereoscopic eyewear.
+
+
+
+E. Improving Performance
+------------------------
+
+Stereoscopic rendering is somewhat more demanding of your computer's
+processor than regular non-stereo game rendering would be. If you are
+running Descent on something slower than a Pentium processor, there
+are several things that you can do to improve game performance:
+
+  Reducing display resolution will speed up redraws significantly.
+      See the "Resolution modes" section above for details on how set
+      the command line option to do this.
+
+  Turning off Descent's background music will improve game redraw
+      speed. To do this, run Descent using the "-nomusic" command
+      line option. If you use the "-nosound" command line option,
+      this will disable both background music and sound effects,
+      resulting in further performance gains.
+
+  Running Descent at a lower detail level will improve performance,
+      at the expense of texture quality. To change detail levels,
+      press <F2> during the game, and select "Detail Levels...".
+
+  When running Descent under Windows 95, performance will be improved
+      by running Descent in "MS-DOS mode" (see "PC operating systems"
+      section below).
+
+
+
+F. PC Operating Systems
+-----------------------
+
+Descent, as modified to be used with SimulEyes VR stereoscopic
+glasses, is best used with Microsoft MS-DOS, versions 5.0 or later.
+
+Running Descent with SimulEyes VR under Windows 3.x is not
+recommended; exit Windows and run Descent under DOS.
+
+Under Windows 95, Descent with SimulEyes VR will generally perform
+best when run in "MS-DOS mode." There are two ways to do this:
+
+  1) Select "Shut Down" from the "Start" menu, and then select
+      "Restart the computer in MS-DOS mode." Then change to the
+      directory in which Descent is loaded, and run it from the
+      command line. To return to Windows 95 when done, type "EXIT"
+      at the command line.
+
+  2) Right-click the icon representing the batch file that activates
+      Descent with SimulEyes VR, and select "Properties." Then select
+      the "Program" properties sheet from this dialog box, and click
+      "Advanced." Click the box for "MS-DOS Mode," and then exit the
+      dialog box by pressing two successive "OK" buttons.
+
+In a few cases, Descent with SimulEyes VR may run better under
+Windows 95 if you do not run it in "MS-DOS" mode, so it is a good
+idea to try both and decide which works better. In some cases,
+depending on the configuration, Descent with SimulEyes VR may not
+work with Windows 95 at all.
+         
+Descent with SimulEyes VR will not work properly under Windows NT.
+
+
+G. Stereoscopic Adjustments
+---------------------------
+
+The stereoscopic viewing settings used by Descent have been carefully
+selected to provide stereoscopic viewing that is both visually
+exciting and comfortable to view for extended periods. However, some
+users may want to play with or fine-tune the stereoscopic settings.
+Note that the following stereoscopic adjustments will work as
+described only when Descent is run using the "/simuleyes" command
+line option and SimulEyes VR stereoscopic eyewear.
+
+  <shift>-F1: Shifts the stereoscopic scene more towards "negative
+      parallax," meaning that things will appear to come out of the
+      screen more, and go into the screen less; the overall depth
+      of the scene remains unchanged.
+
+  <shift>-F2: Shifts the stereoscopic scene more towards "positive
+      parallax," meaning that things will appear to go into the
+      screen more, and come out of the screen less; the overall depth
+      of the scene remains unchanged.
+
+  <shift>-F3: Decreases the stereoscopic camera separation, thus
+      decreasing the overall depth effect; parallax balance remains
+      unchanged.
+
+  <shift>-F4: Increases the stereoscopic camera separation, thus
+      increasing the overall depth effect; parallax balance remains
+      unchanged.
+
+  <shift>-F5: Resets stereoscopic parameters to default values.
+
+
+
+
+H. Other Keyboard Functions
+---------------------------
+
+The following special keyboard functions work only when running
+Descent with SimulEyes VR:
+
+  <shift>-F6: Resets the stereoscopic display buffers.
+
+  <shift>-<enter>: Toggles on-screen text information.
+
+
+The following Descent keyboard functions are disabled when running
+Descent with SimulEyes VR:
+
+  Normally, pressing the <enter> key toggles on-screen text
+      information. When playing Descent with SimulEyes VR, this
+      function is applied using <shift>-<enter>.
+
+  Descent's print-screen function is disabled when in the SimulEyes
+      VR stereoscopic mode.
+
+  The cockpit view feature, normally toggled using the <F3> key, is
+      not supported when using Descent's stereoscopic modes.
+
+  Descent's change screen size functions, normally toggled using the
+      <+> and <-> keys, are not supported when using Descent's
+      stereoscopic modes.
+
+  Note that the "Reverse Stereo" option, which appears on the <F2>
+      menu, relates to stereo audio, not stereoscopic display
+      functions.
+
+
+
+I. Customer Service for the SimulEyes VR.
+-----------------------------------------
+
+Tech Support Number - 
+     812-829-1012 8:00 a.m. - 6:00 p.m. Monday-Friday
+
+Company Address
+
+StereoGraphics Corporation
+2171 E. Francisco Blvd., San Rafael, CA 94901
+
+WebSite:  http://www.stereographics.com
+
+
+
+Stereoscopic modifications allowing Descent to support SimulEyes VR
+were made by Bob Akka and Dave Milici. 
+
+"StereoGraphics" is a registered trademark and "SimulEyes VR" is a
+trademark of StereoGraphics Corporation. "Descent" is a trademark of
+Interplay Productions. LCDBios is a Copyright of Don Sawdai.
+"Microsoft," "Windows," "Windows NT," and "MS-DOS" are registered
+trademarks, and "Windows 95" is a registered trademark of Microsoft
+Corporation. "Pentium" is a registered trademark of Intel. All other
+trademarks belong to their respective companies.
+
