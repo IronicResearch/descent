@@ -1,0 +1,120 @@
+Notes for SIMBIOS v1.27
+
+SIMBIOS.EXE is a replacement for LCDBIOS.EXE with SimulEyes glasses.
+Unlike the real-mode LCDBIOS application shell, SIMBIOS is a DOS/4G
+protected-mode application shell compatible with DOS/4GW, DOS/4GW-Pro
+and other DPMI programs. Having the driver in protected-mode
+means more efficient interrupt handling by the overall application,
+since there is no need to be switching back and forth to real-mode.
+This improved driver efficiency is apparent with the operation of
+additional user input devices, like SpaceBall.
+
+-----------------------------
+Automatic Page-flipping mode:
+-----------------------------
+
+SIMBIOS v1.27 includes a command line option for forcing stereo
+page-flipping modes on automatically in non-LCDBIOS stereo applications.
+Some games which have stereo display modes supported for head-mounted
+display (HMD) devices like Virtual-IO iglasses, may not have included
+stereo page-flipping modes for shutter glasses like SimulEyes.
+
+These HMD-supported games display stereo in alternate-line format,
+so may be tricked into LCDBIOS-compatible stereo page-flipping mode
+by running under the SIMBIOS shell with the "/autoflip" option.
+Since such games have no prior shutter glasses support, you would also
+have to run SIMBIOS with the "/whitecode" option for drawing SimulEyes
+white-line code.
+
+Because stereo page-flipping is forced on whenever a graphics mode is
+set, you might not be able to see all menu items clearly at all times.
+Therefore it is advisable that you understand in advance where key
+commands are for setting HMD stereo display on or off. Also, if a set
+display mode is identified as VGA instead of VESA, like 320x200, then
+stereo page-flipping is not turned on, and the display remains unaffected.
+
+To force stereo page-flipping display modes on in Quake v1.08:
+SIMBIOS /autoflip /whitecode /run:QUAKE
+
+While running Quake, LCD_X and LCD_YAW commands set parallax offset and
+convergance angle of the stereoscopic display.
+
+Note that only VESA graphics modes will be able to correctly intercept
+the application's video page updates, not VGA Mode-X modes. Make sure
+your graphics card supports VESA 2.0 BIOS or later, or use the UNIVBE
+driver kit from SciTech Software. Also, not all graphics controllers are
+able to support line-doubled display modes, which is necessary for this
+LCDBIOS-style hack to work with alternate-line format stereo images.
+Of course, if no such stereo support is built-in to the application at
+all, then there is no point in trying this!
+      
+-----------------------
+White-line Code option:
+-----------------------
+
+SIMBIOS v1.26 features an additional command line option for
+drawing SimulEyes white-line code in generic LCDBIOS applications.
+Some LCDBIOS applications may not have included SimulEyes support,
+so the stereo images are missing SimulEyes white-line code for
+firing the glasses' shutters.
+
+When SIMBIOS is run with the command line option "/whitecode",
+the SIMBIOS driver will draw SimulEyes white-code at the bottom of each 
+currently page-flipped left and right images.
+
+----------------------
+Variable Refresh Rate:
+----------------------
+
+This version features variable refresh rate for 320x200 modes used
+in LCDBIOS games like Descent. The variable refresh rate control is
+effective by using SciTech Software's UNIVBE driver and associated
+refresh utilities. Contact www.scitechsoft.com for downloading a
+trial version of UNIVBE included in the SciTech Display Doctor kit.
+
+Normally 320x200 VGA modes use 70 Hz refresh rate to update
+the monitor display. This is the same rate which the SimulEyes
+shutters open and close, and can show noticeable flicker. The generic
+LCDBIOS driver includes an /HRefresh option to boost the VGA rate
+to nearly 80 Hz, which is preferred for SimulEyes viewing.
+SciTech's UNIVBE driver provides even higher refresh rates for many
+graphics cards, which will allow the most comfortable viewing
+environment for SimulEyes.
+
+Once you have UNIVBE installed for your particular graphics card,
+run the Monitor Refresh Rate utility (UNICENTR.EXE in DOS mode).
+Imprortant note: You will need to select *640x400 8-bit color* mode
+to select the appropriate refresh rate used for 320x200 VGA modes
+used in the LCDBIOS games. Once you have found the highest refresh
+rate which your monitor can correctly display, be sure the UNIVBE
+driver saves this value. When SIMBIOS is run, it will use this
+refresh rate whenever the stereo page-flipping mode is enabled within
+the game. 
+
+-------------------
+Command line usage:
+-------------------
+
+SIMBIOS is run like LCDBIOS, either as a command shell, or as a single
+executable.
+
+To run SIMBIOS as a command shell, use this sequence:
+(1) SIMBIOS
+(2) DESCENT2 [/game-options...]
+...
+(3) EXIT
+
+To run SIMBIOS as an executable for a single LCDBIOS game:
+SIMBIOS /run:DESCENT2 [/game-options...]
+
+For Descent 1.5, remember to use the LCDBIOS command line options:
+SIMBIOS /run:DESCENT /lcdbios /simuleyes [/game-options...]
+
+
+StereoGraphics SimulEyes Support is available at:
+se-supt@crystaleye.com
+www.stereographics.com
+
+SciTech Software Display Doctor is available at:
+www.scitechsoft.com
+
