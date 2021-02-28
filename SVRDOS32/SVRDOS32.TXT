@@ -1,0 +1,342 @@
+StereoGraphics SimulEyes VR driver for 32-bit DOS extenders, like DOS/4G.
+
+The following is a quick summary of SVRDOS32 driver functions.
+Refer to any accompanying SVR documentation for complete information.
+
+Revision history:
+
+Version 2.5x:
+Extended API for callbacks to another driver to perform page-flipping,
+SVRDos32SetCallback().
+
+Version 2.4x:
+Extended API for independent page-flipping functions,
+SVRDos32SetFlip() and SVRDos32UpdateFlip().
+Programmer may use video memory in any mode or page configuration,
+instead of available SVR video modes.
+
+Version 2.3x:
+Support for VESA 2.0 protected mode page-flipping.
+Support for VESA 640x400 and 640x480 modes in linear frame buffers.
+Support for VESA 320x200, 320x240, and 320x400 modes to replace
+equivalent mode-X modes, if available on user video card.
+
+Version 2.2x:
+Support for half-resolution and line-alternate formats.
+Allows low-resolution stereo support for 320x200 and 320x240 modes.
+
+Version 2.1x:
+Extended API for separate stereo page pair update function,
+SVRDos32ShowImages().
+Companion function SVRDos32ClearImages().
+
+Previous users of SVRDOS32 v2.00 should note that the stereo page pair
+update which used to occur automatically with a call to
+SVRDos32SetImage(RIGHT,...) now is invoked explicitly with a call to
+SVRDos32ShowImages(). See the SVRDOS4G.H header for backwards
+compatibility issues.
+
+Version 2.0x:
+Use of LCDBIOS engine (licensed from Don Sawdai) for real-time clock
+interrupt driver instead of system timer interrupt driver.
+
+Earlier versions of the driver library have been called SVRDOS4G,
+since DOS/4G is the only 32-bit DOS extender supported so far.
+
+Previous users of SVRDOS32 v1.xx will note that SVR Timer functions
+have been eliminated, since SVR interrupt handlers now use the
+real-time clock (IRQ8) instead of the main system timer (IRQ0).
+The name of the video sync function has been shortened to "SVRDos32Sync()".
+
+/////////////////
+int SVRDos32Init (void);
+Initializes the SVR driver.
+Identifies which video mode is set on entry.
+Searches for SVRDOS32.DRV loadable driver in current directory.
+If found, driver gets loaded and installed into DPMI memory space
+for duration of application. Otherwise, default functions are used
+within the SVRDOS32.LIB library.
+The loadable driver option allows for easy updating of driver code
+without the need to re-compile or re-link the host application.
+The initialization step does not install any service routine handlers
+at this point.
+
+/////////////////
+int SVRDos32Exit (void);
+Exits the SVR driver.
+Restores the original video mode set on entry to SVRDos32Init().
+Removes the loadable driver from memory, if it was loaded in SVRDos32Init().
+
+////////////////////////
+int SVRDos32SetMode (WORD mode);
+Sets the video mode used by SVR.
+At present, only 320x200 256-color mode is used for full-resolution stereo.
+This is a variation of mode 13, commonly known as "mode X".
+This version of mode X supports 4 video pages. So it is ideal
+for page flipping between a pair of stereo images 2 video pages
+at a time.
+
+Alternative variations of mode-X may be used in half-resolution stereo,
+since both stereo images are fit onto the same video page.
+320x200, 320x240, and 320x400 may used in this half-resolution format
+to yield 320x100, 320x120, and 320x200 resolution per eye.
+
+You must use the SVR enumerated values as the "mode" parameter.
+These are defined in the "SVRDOS32.H" header file.
+Some applications use pre-rendered 320x200 graphics images
+for help displays, menus and dialog boxes, etc. So it may be
+desirable to switch graphics video back to mode 13 for mono
+after the mode X stereo page-flipping display is turned off.
+
+////////////////////
+int SVRDos32GetMode (void );
+Returns the video mode currently used by SVR.
+
+//////////////////////////////////////
+int SVRDos32GetInfo (SVRDos32Info_t FAR * lpInfo);
+Returns ID information about the version of SVR.
+
+The information is filled into a special data structure:
+typedef struct SVRDos32Info {
+    DWORD       hardware_version;       // hardware version 
+    DWORD       driver_version;         // driver version
+    DWORD       video_mode;             // video mode 
+} SVRDos32Info_t;
+
+/////////////////////////////////////////////////////////
+int SVRDos32SetImage (BOOL eye, WORD x0, WORD y0, WORD xd, WORD yd, LPBYTE buf);
+Copies pixel image of to an available video page.
+The boolean flag indicates if the image is for the left or right eye.
+The first pair values are the x0,y0 coordinates for the image to
+appear in a window on the video screen.
+The second pair of values are the x-by-y dimensions of the window,
+with a maximum value of 320x200. Actually only 320x199 is used,
+since the stereo registration encoding lines are always at the 
+bottom of any active video page.
+The pointer points to the pixel data in memory. A far pointer 
+is available in case pixel data resides in its own data selector.
+Otherwise, pixel data in the default data selector may be assumed.
+
+Note that calls may be made to SVRDos32SetImage() as many times
+as desired, since the pixel transfers only affect the non-visible
+stereo image pair. To make the stereo image pair visible, the
+programmer must explicitly make a call to SVRDos32ShowImages().
+
+Note that the organization of the pixel data in a window type
+of format presumes that the pixel data is contiguously addressed
+within the buffer. Some image generating schemes may actually
+provide the pixel data in a clipped format as part of a larger
+frame buffer. This is frequently true with optimized 3D graphics
+renderers. In this case, an option is available within SVR for
+re-addressing the source pixel data within a clipped window buffer.
+This is the "pixels_width" option for SVRDos32SetOptions().
+
+////////////////////////////////////////////////////////
+int SVRDos32GetImage (BOOL eye, WORD x0, WORD y0, WORD xd, WORD yd, LPBYTE buf);
+Copies the requested image area out of the selected video page 
+into a buffer area. This is the inverse operation of
+SVRDos32SetImage().
+
+//////////////////////////////
+int SVRDos32ShowImages (void);
+Explicitly updates the non-visible stereo image pair to become visible.
+The formerly visible stereo image pair now becomes the non-visible
+page pair to write to with subsequent calls to SVRDos32SetImage().
+
+///////////////////////////////
+int SVRDos32ClearImages (void);
+Clears the non-visible stereo image pair to all black pixels.
+Does not affect the visible stereo image pair.
+
+////////////////////////////////
+int SVRDos32SetRegistration (BOOL active);
+Sets page flipping mode to be active or not.
+When active, the video screen will display 2 rapidly alternating
+images, corresponding to the left and right eye stereo pair.
+The left eye image is identified by a 25% white line code,
+and the right eye image is identified by a 75% white line code.
+
+When inactive, the video screen will display the last visible
+page, which is usually the left eye image only.
+
+////////////////////////////
+int SVRDos32GetRegistration (void);
+Returns a flag which indicates if the page flipping mode
+is currently active or not.
+
+///////////////////////////////////
+int SVRDos32SetBlackCode (BYTE color);
+Sets the 256-color palette entry for the black registration code.
+Since the VGA overscan border also needs to be black for SVR glasses
+to operate correctly, this color is usually palette index 0.
+However in applications where the color palette may be adjusted  
+as a sort of special visual effect, both the black and white
+palette entries must be reset for true black and white colors.
+
+///////////////////////////////////
+int SVRDos32SetWhiteCode (BYTE color);
+Sets the 256-color palette entry for the white registration code.
+Any application which uses the 256-color palette may arbitarily
+assign the white color value. So SVR needs to be notified which
+palette entry is supposed to be the white color. Both the black 
+and white colors may need to be reset with a pair of calls to
+SVRDos32SetBlackCode() and SVRDos32SetWhiteCode() anytime the palette
+is modified to a new set of colors.
+
+The default white color index = 15. (When 256-color mode is selected,
+like mode 13, color #15 is always white like in the corresponding
+16-color modes, whereas color #255 is a shade of gray. After the
+mode set, the programmer may change the palette to any set of colors.)
+
+//////////////////////////////////
+int SVRDos32Sync(void);
+Provides sync for the next complete video page update.
+This function is provided for synchronizing SVR run-time functions
+with video update.
+
+//////////////////////////////////////////////////////
+int SVRDos32SetOptions (SVRDos32Option_t FAR * lpOptions);
+Sets a set of run-time options which customizes SVR for
+a particular system configuration.
+
+This function fills in a special options data structure, 
+which may be expanded in future releases of SVR.
+typedef struct SVRDos32Option {
+    DWORD	calls_far;      // SVR function calls near or far ?
+    DWORD	pixels_modex;   // pixel data ordering linear or mode-X ?
+    DWORD	pixels_width;   // pixel data width gaps in pixel buffer
+    DWORD	debug_port;     // port for debugging ISR activity
+    DWORD       pal_protect;    // protect palette during video mode set ?
+    DWORD	line_alternate; // pixel data linear or line-alternate ?
+    DWORD	high_refresh;   // standard video refresh rate or higher ?
+    DWORD	lock_flip;      // SVR ISR polls for vertical retrace ?
+    DWORD	delay_flip;     // SVR ISR flip delay after vertical retrace
+    DWORD	fast_intr;      // SVR ISR interrupt rate doubler
+    DWORD       chipset_support;// custom chipset hardware IO code
+} SVRDos32Option_t;
+
+The miscellaneous options determine how some other features of SVR
+should operate. "pixels_modex" is a flag which tells SVR that the
+pixel data images are already ordered for mode X format. So SVR 
+does not need to perform a linear-to-modulo-4 conversion on the data.
+
+"pixels_width" is a value which specifies that the pixel data images
+are being provided as clipped windows from a larger sized frame buffer.
+For example setting pixels_width = 320 is a typical frame buffer
+specification for 320x200 graphics rendering. Here SVR would know 
+that the pixel data contains un-used gaps every 320 bytes for
+a clipped xd-by-yd source buffer submitted to SVRDos32SetImage().
+Since the xd-width buffer is not contiguous, SVR skips past reading
+these gaps (every 320-xd bytes).
+
+"calls_far" indicates whether SVR function calls are near or far calls.
+In our DOS/4G protected-mode environment the flat memory model is used,
+so all code including library code uses the same 0-based selector
+by default. Setting calls_far indicates to SVR that it resides in
+a separate selector area. (Far calls are available for backwards
+compatibility with libraries which had equivalent real-mode versions.)
+
+"debug_port" is used for testing purposes, so it is normally set to 0.
+
+"pal_protect" selects whether the color palette should be protected
+from video mode sets with calls to SVRDos32SetMode(). Normally,
+setting the video mode will reset the palette to default color values.
+Setting this flag will protect the palette from being reset when
+calls are made to SVRDos32SetMode() for the 320x200 graphics modes.
+An application which may want to switch from stereo 320x200 mode X
+to mono 320x200 mode 13 for pause or help screens would not need to
+re-load its custom palette each time the graphics mode is re-set.
+
+"line-alternate" is a flag which identifies that left- and right-eye
+pixel data images are organized in an alternating even- and odd-numbered
+scan line format. This is for compatibility with stereo rendered images
+which required video interlaced mode to operate, such as head-mounted
+displays (HMDs).
+
+"high-refresh" is an option which boosts the video refresh rate as
+high as possible for superior LCD shutter operation. The default VGA
+refresh rate in 320x200 mode is 70 Hz, which means 70 flickers per
+second. Only some monitors which support high refresh rates may display
+these images satisfactorily.
+
+"lock_flip" is an option which locks the video page-flipping operation
+to the VGA vertical retrace signal. This may make the page-flipping
+routine slow down the overall operation of the computer significantly.
+This option is available only in severe cases where the LCD shutters
+cannot flicker at regular intervals otherwise.
+
+"delay_flip" is a value which delays the page-flipping displays after
+the vertical retrace signal has occured. It is optionally used
+in conjunction with "lock_flip".
+
+"fast_intr" is a value which doubles or halves the rate at which
+the page-flipping routine samples for the next video update interval.
+It is optionally used as an alternative to "lock_flip". Since the
+page-flipping routine is activated by the PC real-time clock interrupt,
+defaulting fast_intr = 0 corresponds to 1024 Hz time-out rate.
+Setting fast_intr = +1 doubles to 2048 Hz, and -1 halves to 512 Hz.
+
+"chipset_support" is a numerical code for custom chipset hardware IO.
+Normally this field will be filled in for an SVRDOS32 driver matched
+with a particular hardware card. Otherwise this field should not be
+used by the applications programmer.
+
+
+//////////////////////////////////////////////////////
+int SVRDos32GetOptions (SVRDos32Option_t FAR * lpOptions);
+Returns the current set of run-time options for SVR.
+
+
+////////////////////////////////////////////
+int SVRDos32SetFlip (BOOL active, DWORD mode);
+
+Sets SVR driver to use page-flipping independently of any available
+SVR driver video mode.
+
+BOOL active enables or disables page-flipping.
+DWORD mode indicates if page-flipping is for VGA mode or VESA mode.
+0 = VGA page-flipping;
+1 = VESA 1.2 page-flipping via INT 10h call;
+2 = VESA 2.0 page-flipping via protected-mode calls;
+3 = VESA 3.0 page-flipping via hardware;
+4 = page-flipping via near callback to external driver;
+5 = page-flipping via far callback to external driver;
+
+Presumes that the programmer will manage video memory directly.
+
+Note that VESA 2.0 support is highly recommended for protected-mode
+page-flipping. Page-flipping performance is severely affected
+if only running in VESA 1.2 mode.
+
+////////////////////////////////////////////////
+int SVRDos32UpdateFlip (PBYTE left, PBYTE right);
+
+Sets the updated pair of video memory addresses to be used in subsequent
+page-flipping. The page pair will become effective after the next complete
+vertical retrace period, whether it is for the left eye or right eye.
+The left and right eye pages are guaranteed to keep stereo in sync for
+un-interrupted left and right eye viewing.
+
+If VGA mode is set, page addresses are VGA 0-based addresses
+(as normally used for VGA Start Address registers).
+
+If VESA mode is set, page addresses are 0-based addresses
+referenced from the start for video memory.
+This VESA linear address indexing is valid regardless of
+(1) VESA 2.0 or VESA 1.2 mode is used;
+(2) linear frame buffer memory or banked memory mode is used;
+(Do not use the virtual XY addressing mode from VESA 1.2)
+
+Of course, it is highly recommended for the programmer to use
+VESA 2.0 linear frame buffer memory mode if detected.
+
+///////////////////////////////////////////////
+int SVRDos32SetCallback (void FAR * lpCallback)
+Registers a callback function to an external driver to perform page-flipping,
+such as the S3D Toolkit for the S3 Virge 3D graphics accelerator.
+
+The callback function will be enabled with SVRDos32SetFlip(TRUE, 4).
+This callback function will be called from the interrupt service routine
+everytime the left or right page needs to be flipped. As such, the
+callback routine must return immediately.
+
