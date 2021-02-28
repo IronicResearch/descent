@@ -1,7 +1,8 @@
 @echo off
-set TOOLROOTDIR=d:\MSVC
-set PATH=d:\masm\bin;d:\watcom\binnt;d:\MSVC\BIN;%PATH%
-set INCLUDE=d:\watcom\h;d:\MSVC\INCLUDE;%INCLUDE%;d:\dev\d1\lib;d:\dev\d1\includes;
-set LIB=d:\MSVC\LIB;%LIB%
-set watcom=d:\watcom\
-
+set TOOLDIR=c:\c\bin-win32
+set MASMDIR=c:\c\masm611
+set WATCOM=c:\c\wc10
+set DESCENT=y:\Development\IronicResearch\descent
+set PATH=%MASMDIR%\bin;%WATCOM%\binnt;%TOOLDIR%;%PATH%
+set INCLUDE=%WATCOM%\h;%INCLUDE%;%DESCENT%\lib;%DESCENT%\includes;
+set LIB=%WATCOM%\lib;%LIB%

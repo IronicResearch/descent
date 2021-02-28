@@ -31,9 +31,9 @@ LIBS = texmap
 TEXMAP_OBJS = 	ntmap.obj tmapflat.obj  
 
 #%if !%defined(NASM)
-TEXMAP_OBJS +=	tmap_per.obj tmap_lin.obj tmap_ll.obj tmap_flt.obj tmapfade.obj tmap_fl1.obj
+TEXMAP2_OBJS =	tmap_per.obj tmap_lin.obj tmap_ll.obj tmap_flt.obj tmapfade.obj tmap_fl1.obj
 #%else
-TEXMAP_OBJS += scanline.obj
+TEXMAP3_OBJS = scanline.obj
 #%endif
 
 # What to clean
@@ -46,8 +46,8 @@ TEST_PROGS = textest
 TEXTEST_SRCS = TEXTEST.obj
 TEXTEST_LIBS = TEXMAP.lib
 
-texmap.lib: $(TEXMAP_OBJS)
-	wlib texmap.lib $(TEXMAP_OBJS)
+texmap.lib: $(TEXMAP_OBJS) $(TEXMAP2_OBJS) $(TEXMAP3_OBJS)
+	wlib texmap.lib $(TEXMAP_OBJS) $(TEXMAP2_OBJS) $(TEXMAP3_OBJS)
 	copy *.lib $(LIBDIR)
 lightabs.obj: lightabs.asm
 	masm lightabs.asm

@@ -46,10 +46,8 @@ errtest.obj: errtest.c error.h
 	wcc386 $(CCFLAGS) errtest.c
 
 parsarg.obj: parsarg.c parsarg.h
-
 	wcc386 $(CCFLAGS) parsarg.c
 
 parstest.obj: parstest.c parsarg.h 
-
 	wcc386 $(CCFLAGS) parstest.c
 
