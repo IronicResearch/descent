@@ -12,9 +12,16 @@ SUBSYSTEMS = misc includes fix cfile 2d bios iff div mem vecmat 3d texmap
 SUBTARGETS = clean optimize no_mono no_debug linstall
 #SUBTARGETS = update linstall
 
+OBJS = misc\*.obj fix\*.obj cfile\*.obj 2d\*.obj bios\*.obj iff\*.obj div\*.obj mem\*.obj \
+			vecmat\*.obj 3d\*.obj texmap\*.obj ui\*.obj main\*.obj main\editor\*.obj
+
+LIBS = misc\*.lib fix\*.lib cfile\*.lib 2d\*.lib bios\*.lib iff\*.lib div\*.lib mem\*.lib \
+			vecmat\*.lib 3d\*.lib texmap\*.lib ui\*.lib main\*.lib main\editor\*.lib
+
+EXES = main\descentr.exe
+
 # When making clean here, delete libs
-CLEAN_TARGS = misc\*.obj fix\*.obj cfile\*.obj 2d\*.obj bios\*.obj iff\*.obj div\*.obj mem\*.obj \
-			vecmat\*.obj 3d\*.obj texmap\*.obj ui\*.obj main\*.obj main\editor\*.obj main\*.lib
+CLEAN_TARGS = $(OBJS) $(LIBS) $(EXES)
 #lib\*.lib lib\*.h lib\*.inc
 
 #all Miner makefiles should include this

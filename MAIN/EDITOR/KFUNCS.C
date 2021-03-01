@@ -457,7 +457,7 @@ FUNCTION med_functions[] = {
 {   "med-find-concave-segs",            0,        FindConcaveSegs },
 {   "med-select-next-found-seg",        0,        SelectNextFoundSeg },
 {   "med-select-prev-found-seg",        0,        SelectPreviousFoundSeg },
-{   "med-stop-slew",                    0,        slew_stop },
+//{   "med-stop-slew",                    0,        slew_stop },
 //{   "med-reset-orientation",            0,        do_reset_orient },
 {   "med-game-zoom-out",                0,        GameZoomOut },
 {   "med-game-zoom-in",                 0,        GameZoomIn },
