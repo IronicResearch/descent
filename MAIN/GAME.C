@@ -379,6 +379,10 @@ static char rcsid[] = "$Id: game.c 2.36 1996/01/05 16:52:05 john Exp $";
 #include "editor\editor.h"
 #endif
 
+#ifdef SVRDOS32
+#include "svrdos32.h"
+#endif
+
 //#define _MARK_ON 1
 //#include <wsample.h>            //should come after inferno.h to get mark setting
 //Above file is missing in the release version of the source. -KRB
@@ -1082,6 +1086,11 @@ int set_screen_mode(int sm)
 		if ( Game_vfx_flag )
 			vfx_close_graphics();
 
+#ifdef SVRDOS32
+		if ( Game_simuleyes_flag )
+			SVRDos32SetRegistration(FALSE);
+#endif
+
 		gr_init_sub_canvas( &VR_screen_pages[0], &grd_curscreen->sc_canvas, 0, 0, grd_curscreen->sc_w, grd_curscreen->sc_h );
 		gr_init_sub_canvas( &VR_screen_pages[1], &grd_curscreen->sc_canvas, 0, 0, grd_curscreen->sc_w, grd_curscreen->sc_h );
 		break;
@@ -1101,6 +1110,20 @@ int set_screen_mode(int sm)
 			vfx_init_graphics();
 			Beam_brightness=0x38000;
 		}
+
+#ifdef SVRDOS32
+		if ( Game_simuleyes_flag ) {
+			// set stereo page-flip compatible mode, via VESA or VGA mode X
+			switch (VR_screen_mode) {
+				case SM_320x200C: SVRDos32SetMode(SVR_320_200_X); break;
+				case SM_320x400U: SVRDos32SetMode(SVR_320_400_X); break;
+			}
+			// enable stereo page-flipping with white-line registration tags
+			SVRDos32SetBlackCode(svr_black);
+			SVRDos32SetWhiteCode(svr_white);
+			SVRDos32SetRegistration(TRUE);
+		}
+#endif
 
 		if ( VR_render_mode == VR_NONE )	{
 			if ( max_window_h == 0 )	{
@@ -1733,6 +1756,15 @@ game_render_frame_stereo_interlaced()
 		game_draw_hud_stuff();
 	}
 
+#ifdef SVRDOS32
+	// updates stereo page-flipping with left/right image blits
+	if ( Game_simuleyes_flag ) {
+		SVRDos32SetImage(SVR_LEFT,  0, 0, dw, dh, RenderCanvas[0].cv_bitmap.bm_data);
+		SVRDos32SetImage(SVR_RIGHT, 0, 0, dw, dh, RenderCanvas[1].cv_bitmap.bm_data);
+		SVRDos32ShowImages();
+		return;
+	}
+#endif
 
 	// Draws white and black registration encoding lines
 	// and Accounts for pixel-shift adjustment in upcoming bitblts
@@ -2187,6 +2219,10 @@ void diminish_palette_towards_normal(void)
 
 	// need to reset black and white palette colors for SVR registration
 	if (Game_simuleyes_flag)  {
+#ifdef SVRDOS32
+		SVRDos32SetBlackCode(svr_black);
+		SVRDos32SetWhiteCode(svr_white);
+#else
 		// make black be black		
 		outp( 0x3c6, 0xff );
 		outp( 0x3c8, svr_black );
@@ -2199,6 +2235,7 @@ void diminish_palette_towards_normal(void)
 		outp( 0x3c9, 63 );
 		outp( 0x3c9, 63 );
 		outp( 0x3c9, 63 );
+#endif
 	}
 }
 
