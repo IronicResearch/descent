@@ -1074,12 +1074,6 @@ int set_screen_mode(int sm)
 
 	switch( Screen_mode )	{
 	case SCREEN_MENU:
-
-		if (grd_curscreen->sc_mode != SM_320x200C)	{
-			if (gr_set_mode(SM_320x200C)) Error("Cannot set screen mode for game!");
-	 		gr_palette_load( gr_palette );
-		}
-
 		if ( Game_3dmax_flag )
 			game_3dmax_off();
 
@@ -1090,6 +1084,12 @@ int set_screen_mode(int sm)
 		if ( Game_simuleyes_flag )
 			SVRDos32SetRegistration(FALSE);
 #endif
+
+		// make sure stereo mode is off before resetting graphics mode
+		if (grd_curscreen->sc_mode != SM_320x200C)	{
+			if (gr_set_mode(SM_320x200C)) Error("Cannot set screen mode for game!");
+	 		gr_palette_load( gr_palette );
+		}
 
 		gr_init_sub_canvas( &VR_screen_pages[0], &grd_curscreen->sc_canvas, 0, 0, grd_curscreen->sc_w, grd_curscreen->sc_h );
 		gr_init_sub_canvas( &VR_screen_pages[1], &grd_curscreen->sc_canvas, 0, 0, grd_curscreen->sc_w, grd_curscreen->sc_h );
@@ -1115,8 +1115,10 @@ int set_screen_mode(int sm)
 		if ( Game_simuleyes_flag ) {
 			// set stereo page-flip compatible mode, via VESA or VGA mode X
 			switch (VR_screen_mode) {
+				case SM_320x400U:
 				case SM_320x200C: SVRDos32SetMode(SVR_320_200_X); break;
-				case SM_320x400U: SVRDos32SetMode(SVR_320_400_X); break;
+				case SM_320x480U:
+				case SM_320x240U: SVRDos32SetMode(SVR_320_240_X); break;
 			}
 			// enable stereo page-flipping with white-line registration tags
 			SVRDos32SetBlackCode(svr_black);
@@ -1762,7 +1764,7 @@ game_render_frame_stereo_interlaced()
 		SVRDos32SetImage(SVR_LEFT,  0, 0, dw, dh, RenderCanvas[0].cv_bitmap.bm_data);
 		SVRDos32SetImage(SVR_RIGHT, 0, 0, dw, dh, RenderCanvas[1].cv_bitmap.bm_data);
 		SVRDos32ShowImages();
-		return;
+		goto done;
 	}
 #endif
 
@@ -1879,6 +1881,8 @@ game_render_frame_stereo_interlaced()
 		}
 		gr_wait_for_retrace = 1;
 	}
+
+done:
 	grd_curscreen->sc_aspect=save_aspect;
 }
 

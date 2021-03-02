@@ -1458,6 +1458,9 @@ int main(int argc,char **argv)
 
 		if ( FindArg( "-simuleyes" ))  {
 			Game_simuleyes_flag = 1;
+			VR_switch_eyes = 0;
+			VR_low_res = 0;
+			vr_mode = VR_INTERLACED;
 #ifdef SVRDOS32
 			SVRDos32Init();
 #endif
