@@ -1,0 +1,64 @@
+# Makefile for SVRDOS32 loadable driver.
+# Hacked from Makefile template. (DaveM)
+
+# which memory model and processor to use by default
+PROCESSOR = 386 	# for the 32-bit compilers
+RELEASE = 1		# 0 = debug version; 1 = release version
+
+# name the compiler
+CC = wcc386     
+ASM = tasm
+
+!ifeq 	PROCESSOR 	386
+MODEL = f       # flat
+!else
+MODEL = l       # large
+!endif
+
+# options to use
+!ifeq 	RELEASE		1
+CFLAGS = -mf -3r -zp4 -d0
+AFLAGS = /m2 /l /p /s
+LNKOPT = /t /3 /m /s
+!else
+CFLAGS = -m$(MODEL) -3r -zp4 -od -d2 -w4
+AFLAGS = -m$(MODEL) -3pr -d1
+LNKOPT = debug all
+!endif
+
+.EXTENSIONS:
+.EXTENSIONS: .exe .lib .obj .asm .inc .c .h 
+
+.BEFORE
+        @set INCLUDE=.;$(%watcom)\h;
+        @set DOS4G=QUIET
+
+# name executable file(s) here
+exes = svrdos32.com svrhdr32.com svrdos32.drv
+
+# explicit rules
+
+all:    $(exes) .SYMBOLIC
+        @%null
+
+svrdos32.com : svrdos32.obj svrisr32.obj modex32.obj bimo32.obj rtc32.obj lcd32.obj oem32.obj vesa32.obj .PRECIOUS
+        tlink svrdos32 svrisr32 modex32 bimo32 rtc32 lcd32 oem32 vesa32 $(LNKOPT)
+
+svrhdr32.com : svrhdr32.obj .PRECIOUS
+	tlink svrhdr32 $(LNKOPT)
+
+svrdos32.drv : svrdos32.com svrhdr32.com
+	copy /b svrhdr32.com+svrdos32.com /b svrdos32.drv
+	
+run_all:    .SYMBOLIC
+	-svrdos32.com
+	-svrhdr32.com
+	-svrdos32.drv
+
+# implicit rules
+
+.c.obj :
+        $(CC) $^& $(CFLAGS)
+
+.asm.obj :
+        $(ASM) $(AFLAGS) $^&

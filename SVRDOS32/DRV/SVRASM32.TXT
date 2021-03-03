@@ -1,0 +1,181 @@
+Summary Notes on Assembly Language Interface to SVRDOS32.DRV
+
+
+The SVRDOS32.DRV is a loadable driver for use in DPMI 32-bit
+protected-mode applications. The driver format and interface scheme
+is custom devised by StereoGraphics, due to lack of driver specification
+under DPMI.
+
+It is originally intended for run-time loading by a C interface library
+mechanism included in SVRDOS32.LIB for DOS/4G applications.
+
+Alternatively, the SVRDOS32.DRV driver API functions may be accessed
+directly in 386 assembly language by any DPMI application.
+
+The driver must be loaded into an allocated memory area which
+is accessed by its own code selector. Entry points into the code
+area are made via a jump table starting at a fixed location.
+
+Driver memory area is allocated and locked with DPMI functions 0501h
+and 0600h. Data selector for driver is assigned with DPMI function
+0000h, and set up for base address and limit with DPMI functions
+0007h and 0008h. Finally a code selector is obtained as an alias for
+the driver data selector by manually changing descriptor bits with
+DPMI functions 000Bh and 000Ch.
+
+Starting with SVRDOS32.DRV v2.31, choice of two jump tables are available
+at two starting locations. The alternate jump table is aligned on 8-byte
+addresses for efficiency, whereas the original jump table concatenated
+addresses every 5 bytes per 32-bit JMP instruction.
+
+SVRDOS32 function parameters are loaded directly into CPU registers.
+SVRDOS32 functions are executed with far calls (16:32 FWORD) into the
+jump table on a 32-bit stack (USE32). The far call selector is the
+CS alias obtained from the driver DS, and the offset is the jump table
+entry point. All SVRDOS32 functions exit with far returns.
+
+The SVRDOS32 driver has the following memory map:
+
+0000h-1000h = data area
+0000h-0100h = data area header
+0000h-0010h = data area ID "****SVRDOS32****"
+0100h-0FFFh = data
+
+1000h-FFFFh = code area
+1000h-1100h = code area jump table (32-bit JMP every 5 bytes)
+1100h-1200h = code area alternate jump table (32-bit JMP every 8 bytes)
+1200h-FFFFh = code
+
+The original jump table has the following 32 entry points:
+
+1000h+0	= function #0 = SVRDos32Init()
+1000h+5	= function #1 = SVRDos32Exit()
+1000h+10 = function #2 = SVRDos32SetMode()
+1000h+15 = function #3 = SVRDos32GetMode()
+1000h+20 = function #4 = SVRDos32GetInfo()
+1000h+25 = function #5 = SVRDos32SetImage()
+1000h+30 = function #6 = SVRDos32GetImage
+1000h+35 = function #7 = SVRDos32GetRegistration()
+1000h+40 = function #8 = SVRDos32SetRegistration()
+1000h+45 = function #9 = SVRDos32SetBlackCode()
+1000h+50 = function #10 = SVRDos32SetWhiteCode()
+1000h+55 = function #11 = SVRDos32Sync()
+1000h+60 = function #12 (not used)
+1000h+65 = function #13 (not used)
+1000h+70 = function #14 (not used)
+1000h+75 = function #15 (not used)
+1000h+80 = function #16 (not used)
+1000h+85 = function #17 = SVRDos32SetOptions()
+1000h+90 = function #18 = SVRDos32GetOptions()
+1000h+95 = function #19 = SVRDos32ShowImages()
+1000h+100 = function #20 = SVRDos32ClearImages()
+1000h+105 = function #21 = SVRDos32SetFlip()
+1000h+110 = function #22 = SVRDos32UpdateFlip()
+1000h+115 = function #23 = SVRDos32SetCallback()
+1000h+120 = function #24 (reserved)
+...
+1000h+150 = function #30 (reserved)
+1000h+155 = function #31 (reserved)
+
+The alternate jump table has the following 32 entry points:
+
+1100h+0h  = function #0 = SVRDos32Init()
+1100h+8h  = function #1 = SVRDos32Exit()
+1100h+10h = function #2 = SVRDos32SetMode()
+1100h+18h = function #3 = SVRDos32GetMode()
+1100h+20h = function #4 = SVRDos32GetInfo()
+1100h+28h = function #5 = SVRDos32SetImage()
+1100h+30h = function #6 = SVRDos32GetImage
+1100h+38h = function #7 = SVRDos32GetRegistration()
+1100h+40h = function #8 = SVRDos32SetRegistration()
+1100h+48h = function #9 = SVRDos32SetBlackCode()
+1100h+50h = function #10 = SVRDos32SetWhiteCode()
+1100h+58h = function #11 = SVRDos32Sync()
+1100h+60h = function #12 (not used)
+1100h+68h = function #13 (not used)
+1100h+70h = function #14 (not used)
+1100h+78h = function #15 (not used)
+1100h+80h = function #16 (not used)
+1100h+88h = function #17 = SVRDos32SetOptions()
+1100h+90h = function #18 = SVRDos32GetOptions()
+1100h+98h = function #19 = SVRDos32ShowImages()
+1100h+0A0h = function #20 = SVRDos32ClearImages()
+1100h+0A8h = function #21 = SVRDos32SetFlip()
+1100h+0B0h = function #22 = SVRDos32UpdateFlip()
+1100h+0B8h = function #23 = SVRDos32SetCallback()
+1100h+0C0h = function #24 (reserved)
+...
+1100h+0F0h = function #30 (reserved)
+1100h+0F8h = function #31 (reserved)
+
+
+The SVRDOS32 v2.0 API function parameters are loaded as follows:
+Refer to the SVRDOS32 documentation on equivalent C functions for details.
+
+DWORD xSVRDos32Init (void);
+[EAX] xSVRDos32Init (void);
+
+DWORD xSVRDos32Exit (void);
+[EAX] xSVRDos32Exit (void);
+
+DWORD xSVRDos32SetMode (WORD mode);
+[EAX] xSVRDos32SetMode ([AX] mode);
+
+DWORD xSVRDos32GetMode (void);
+[EAX] xSVRDos32GetMode (void);
+
+DWORD xSVRDos32GetInfo (SVRDos32Info_t FAR * lpInfo);
+[EAX] xSVRDos32GetInfo ([CX:EBX] FAR * lpInfo);
+
+DWORD xSVRDos32SetImage (DWORD eye, DWORD x0_y0, DWORD xd_yd, LPBYTE buf);
+[EAX] xSVRDos32SetImage ([EAX] eye, [EBX] x0_y0, [ECX] xd_yd, [DX:ESI] buf);
+
+DWORD xSVRDos32GetImage (DWORD eye, DWORD x0_y0, DWORD xd_yd, LPBYTE buf);
+[EAX] xSVRDos32GetImage ([EAX] eye, [EBX] x0_y0, [ECX] xd_yd, [DX:EDI] buf);
+
+DWORD xSVRDos32GetRegistration (void);
+[EAX] xSVRDos32GetRegistration (void);
+
+DWORD xSVRDos32SetRegistration (DWORD active);
+[EAX] xSVRDos32SetRegistration ([EAX] active);
+
+DWORD xSVRDos32SetBlackCode (BYTE color);
+[EAX] xSVRDos32SetBlackCode ([AL] color);
+
+DWORD xSVRDos32SetWhiteCode (BYTE color);
+[EAX] xSVRDos32SetWhiteCode ([AL] color);
+
+DWORD xSVRDos32Sync (void);
+[EAX] xSVRDos32Sync (void);
+
+DWORD xSVRDos32SetOptions (SVRDos32Option_t FAR * lpOptions);
+[EAX] xSVRDos32SetOptions ([CX:EBX] FAR * lpOptions);
+
+DWORD xSVRDos32GetOptions (SVRDos32Option_t FAR * lpOptions);
+[EAX] xSVRDos32GetOptions ([CX:EBX] FAR * lpOptions);
+
+DWORD xSVRDos32ShowImages(void);
+[EAX] xSVRDos32ShowImages(void);
+
+DWORD xSVRDos32ClearImages(void);
+[EAX] xSVRDos32ClearImages(void);
+
+DWORD xSVRDos32SetFlip (BOOL active, BOOL mode);
+[EAX] xSVRDos32SetFlip ([EBX] active, [ECX]mode);
+
+DWORD xSVRDos32UpdateFlip (PBYTE left, PBYTE right);
+[EAX] xSVRDos32UpdateFlip ([EBX] left, [ECX] right);
+
+DWORD xSVRDos32SetCallback (VOID FAR * lpCallback);
+[EAX] xSVRDos32SetCallback ([CX:EBX] FAR * lpCallback);
+
+
+All SVRDOS32 functions expect DS and ES to both point to the application's
+0-based data selector when called. These data selectors will be
+restored unchanged upon return.
+
+All SVRDOS32 functions will use the general registers EAX, EBX, ECX, EDX,
+ESI, and EDI. These registers will be left changed upon return.
+
+All SVRDOS32 functions return a DWORD value in EAX.
+
