@@ -27,7 +27,7 @@ COPYRIGHT 1993-1998 PARALLAX SOFTWARE CORPORATION.  ALL RIGHTS RESERVED.
 //#define PASSWORD		//PASSWORD is OFF 
 //#define STORE_DEMO 1	//STORE_DEMO is OFF 
 #define PIGGY_USE_PAGING 1		//Don't use paging from pig file 
-//#define DEST_SAT 1		// Not building for Destination Saturn (OEM version) 
+#define DEST_SAT 1		// Not building for Destination Saturn (OEM version) 
 //#define REQUIRE_CD 1	// Doesn't require a CD in drive 
 //#define USE_CD 1	// Doesn't use a CD in drive 
 //#define ROCKWELL_CODE 1	// Rockwell psuedo shareware 
