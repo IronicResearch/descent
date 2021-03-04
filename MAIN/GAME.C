@@ -992,6 +992,15 @@ void game_init_render_buffers(int screen_mode, int render_w, int render_h, int u
 			gr_init_sub_canvas( &VR_render_buffer[1], VR_offscreen_buffer, 0, 0, render_w, render_h );
 		}
 		game_init_render_sub_buffers( 0, 0, render_w, render_h );
+#ifdef SVRDOS32
+		if ( Game_simuleyes_flag ) {
+			SVRDos32Option_t opt;
+			// need to query render buffer stride if blitting sub-regions via SVRDos32SetImage()
+			SVRDos32GetOptions(&opt);
+			opt.pixels_width = VR_render_buffer[0].cv_bitmap.bm_rowsize;
+			SVRDos32SetOptions(&opt);
+		}
+#endif
 	}
 }
 
@@ -1761,8 +1770,9 @@ game_render_frame_stereo_interlaced()
 #ifdef SVRDOS32
 	// updates stereo page-flipping with left/right image blits
 	if ( Game_simuleyes_flag ) {
-		SVRDos32SetImage(SVR_LEFT,  0, 0, dw, dh, RenderCanvas[0].cv_bitmap.bm_data);
-		SVRDos32SetImage(SVR_RIGHT, 0, 0, dw, dh, RenderCanvas[1].cv_bitmap.bm_data);
+		int dx = (VR_eye_offset < 0) ? labs(VR_eye_offset) : 0;
+		SVRDos32SetImage(SVR_LEFT, dx, 0, dw-dx, dh, RenderCanvas[0].cv_bitmap.bm_data);
+		SVRDos32SetImage(SVR_RIGHT, 0, 0, dw-dx, dh, RenderCanvas[1].cv_bitmap.bm_data);
 		SVRDos32ShowImages();
 		goto done;
 	}
@@ -2800,6 +2810,10 @@ void game()
 				int save_w=Game_window_w,save_h=Game_window_h;
 				if ( Game_3dmax_flag )
 					game_3dmax_off();
+#ifdef SVRDOS32
+				if ( Game_simuleyes_flag )
+					SVRDos32SetRegistration(FALSE);
+#endif
 				do_automap(0);
 				Screen_mode=-1; set_screen_mode(SCREEN_GAME);
 				Game_window_w=save_w; Game_window_h=save_h;
@@ -2808,7 +2822,10 @@ void game()
 				last_drawn_cockpit[1] = -1;
 				if ( Game_3dmax_flag )
 					game_3dmax_on();
-
+#ifdef SVRDOS32
+				if ( Game_simuleyes_flag )
+					SVRDos32SetRegistration(TRUE);
+#endif
 				if (VR_screen_mode != SCREEN_MENU)
 					vr_reset_display();
 			}
