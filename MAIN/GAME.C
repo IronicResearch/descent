@@ -1770,18 +1770,10 @@ game_render_frame_stereo_interlaced()
 #ifdef SVRDOS32
 	// updates stereo page-flipping with left/right image blits
 	if ( Game_simuleyes_flag ) {
-		if (VR_eye_offset > 0) {
-		int dx = (VR_eye_offset > 0) ? labs(VR_eye_offset) : 0;
-		SVRDos32SetImage(SVR_LEFT, dx, 0, dw-dx, dh, RenderCanvas[0].cv_bitmap.bm_data);
-		SVRDos32SetImage(SVR_RIGHT, 0, 0, dw-dx, dh, RenderCanvas[1].cv_bitmap.bm_data+dx);
-		SVRDos32ShowImages();
-		}
-		else {
 		int dx = (VR_eye_offset < 0) ? labs(VR_eye_offset) : 0;
 		SVRDos32SetImage(SVR_LEFT,  0, 0, dw-dx, dh, RenderCanvas[0].cv_bitmap.bm_data+dx);
 		SVRDos32SetImage(SVR_RIGHT,dx, 0, dw-dx, dh, RenderCanvas[1].cv_bitmap.bm_data);
 		SVRDos32ShowImages();
-		}
 		goto done;
 	}
 #endif
@@ -3666,7 +3658,7 @@ void ReadControls()
 						VR_eye_width		= VR_SEPARATION;
 						VR_eye_offset = VR_PIXEL_SHIFT;
 						VR_eye_offset_changed = 2;
-						HUD_init_message( "Stereo parameters reset, offset=%d", VR_eye_offset);
+						HUD_init_message( "Stereo parameters reset");
 					}
 					break;
 
@@ -3723,8 +3715,8 @@ void ReadControls()
 								VR_PIXEL_SHIFT, VR_SEPARATION);
 						VR_eye_offset = (int) ((fixmul (simuleyes_adjusted_offset_ratio,
 								VR_eye_width) - F1_0/2) / F1_0);
-						HUD_init_message( "Stereoscopic balance = %.1f, offset=%d",
-								f2fl(simuleyes_offset_ratio)*10, VR_eye_offset);
+						HUD_init_message( "Stereoscopic balance = %.1f",
+								f2fl(simuleyes_offset_ratio)*10);
 					VR_eye_offset_changed = 2;
 					break;
 				case KEY_SHIFTED+KEY_F2:   // altered 11/9/95, 11/10/95
@@ -3736,8 +3728,8 @@ void ReadControls()
 								VR_PIXEL_SHIFT, VR_SEPARATION);
 						VR_eye_offset = (int) ((fixmul (simuleyes_adjusted_offset_ratio,
 								VR_eye_width) - F1_0/2) / F1_0);
-						HUD_init_message( "Stereoscopic balance = %.1f, offset=%d",
-								f2fl(simuleyes_offset_ratio)*10, VR_eye_offset);
+						HUD_init_message( "Stereoscopic balance = %.1f",
+								f2fl(simuleyes_offset_ratio)*10);
 					VR_eye_offset_changed = 2;
 					break;
 				case KEY_SHIFTED+KEY_F3:
@@ -3747,7 +3739,7 @@ void ReadControls()
 						VR_eye_offset = (int) ((fixmul (simuleyes_adjusted_offset_ratio,
 								VR_eye_width) - F1_0/2) / F1_0);
 						VR_eye_offset_changed = 2;
-						HUD_init_message( "Stereo separation = %.1f, offset=%d", f2fl(VR_eye_width)*10, VR_eye_offset);
+						HUD_init_message( "Stereo separation = %.1f", f2fl(VR_eye_width)*10);
 					break;
 				case KEY_SHIFTED+KEY_F4:
 						VR_eye_width = VR_eye_width * 11 / 10;
@@ -3756,7 +3748,7 @@ void ReadControls()
 						VR_eye_offset = (int) ((fixmul (simuleyes_adjusted_offset_ratio,
 								VR_eye_width) - F1_0/2) / F1_0);
 						VR_eye_offset_changed = 2;
-						HUD_init_message( "Stereo separation = %.1f, offset=%d", f2fl(VR_eye_width)*10, VR_eye_offset);
+						HUD_init_message( "Stereo separation = %.1f", f2fl(VR_eye_width)*10);
 					break;
 
 
