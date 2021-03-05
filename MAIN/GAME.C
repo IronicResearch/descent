@@ -379,6 +379,10 @@ static char rcsid[] = "$Id: game.c 2.36 1996/01/05 16:52:05 john Exp $";
 #include "editor\editor.h"
 #endif
 
+#ifdef SVRDOS32
+#include "svrdos32.h"
+#endif
+
 //#define _MARK_ON 1
 //#include <wsample.h>            //should come after inferno.h to get mark setting
 //Above file is missing in the release version of the source. -KRB
@@ -988,6 +992,15 @@ void game_init_render_buffers(int screen_mode, int render_w, int render_h, int u
 			gr_init_sub_canvas( &VR_render_buffer[1], VR_offscreen_buffer, 0, 0, render_w, render_h );
 		}
 		game_init_render_sub_buffers( 0, 0, render_w, render_h );
+#ifdef SVRDOS32
+		if ( Game_simuleyes_flag ) {
+			SVRDos32Option_t opt;
+			// need to query render buffer stride if blitting sub-regions via SVRDos32SetImage()
+			SVRDos32GetOptions(&opt);
+			opt.pixels_width = VR_render_buffer[0].cv_bitmap.bm_rowsize;
+			SVRDos32SetOptions(&opt);
+		}
+#endif
 	}
 }
 
@@ -1070,17 +1083,22 @@ int set_screen_mode(int sm)
 
 	switch( Screen_mode )	{
 	case SCREEN_MENU:
-
-		if (grd_curscreen->sc_mode != SM_320x200C)	{
-			if (gr_set_mode(SM_320x200C)) Error("Cannot set screen mode for game!");
-	 		gr_palette_load( gr_palette );
-		}
-
 		if ( Game_3dmax_flag )
 			game_3dmax_off();
 
 		if ( Game_vfx_flag )
 			vfx_close_graphics();
+
+#ifdef SVRDOS32
+		if ( Game_simuleyes_flag )
+			SVRDos32SetRegistration(FALSE);
+#endif
+
+		// make sure stereo mode is off before resetting graphics mode
+		if (grd_curscreen->sc_mode != SM_320x200C)	{
+			if (gr_set_mode(SM_320x200C)) Error("Cannot set screen mode for game!");
+	 		gr_palette_load( gr_palette );
+		}
 
 		gr_init_sub_canvas( &VR_screen_pages[0], &grd_curscreen->sc_canvas, 0, 0, grd_curscreen->sc_w, grd_curscreen->sc_h );
 		gr_init_sub_canvas( &VR_screen_pages[1], &grd_curscreen->sc_canvas, 0, 0, grd_curscreen->sc_w, grd_curscreen->sc_h );
@@ -1101,6 +1119,22 @@ int set_screen_mode(int sm)
 			vfx_init_graphics();
 			Beam_brightness=0x38000;
 		}
+
+#ifdef SVRDOS32
+		if ( Game_simuleyes_flag ) {
+			// set stereo page-flip compatible mode, via VESA or VGA mode X
+			switch (VR_screen_mode) {
+				case SM_320x400U:
+				case SM_320x200C: SVRDos32SetMode(SVR_320_200_X); break;
+				case SM_320x480U:
+				case SM_320x240U: SVRDos32SetMode(SVR_320_240_X); break;
+			}
+			// enable stereo page-flipping with white-line registration tags
+			SVRDos32SetBlackCode(svr_black);
+			SVRDos32SetWhiteCode(svr_white);
+			SVRDos32SetRegistration(TRUE);
+		}
+#endif
 
 		if ( VR_render_mode == VR_NONE )	{
 			if ( max_window_h == 0 )	{
@@ -1733,6 +1767,16 @@ game_render_frame_stereo_interlaced()
 		game_draw_hud_stuff();
 	}
 
+#ifdef SVRDOS32
+	// updates stereo page-flipping with left/right image blits
+	if ( Game_simuleyes_flag ) {
+		int dx = (VR_eye_offset < 0) ? labs(VR_eye_offset) : 0;
+		SVRDos32SetImage(SVR_LEFT,  0, 0, dw-dx, dh, RenderCanvas[0].cv_bitmap.bm_data+dx);
+		SVRDos32SetImage(SVR_RIGHT,dx, 0, dw-dx, dh, RenderCanvas[1].cv_bitmap.bm_data);
+		SVRDos32ShowImages();
+		goto done;
+	}
+#endif
 
 	// Draws white and black registration encoding lines
 	// and Accounts for pixel-shift adjustment in upcoming bitblts
@@ -1847,6 +1891,8 @@ game_render_frame_stereo_interlaced()
 		}
 		gr_wait_for_retrace = 1;
 	}
+
+done:
 	grd_curscreen->sc_aspect=save_aspect;
 }
 
@@ -2187,6 +2233,10 @@ void diminish_palette_towards_normal(void)
 
 	// need to reset black and white palette colors for SVR registration
 	if (Game_simuleyes_flag)  {
+#ifdef SVRDOS32
+		SVRDos32SetBlackCode(svr_black);
+		SVRDos32SetWhiteCode(svr_white);
+#else
 		// make black be black		
 		outp( 0x3c6, 0xff );
 		outp( 0x3c8, svr_black );
@@ -2199,6 +2249,7 @@ void diminish_palette_towards_normal(void)
 		outp( 0x3c9, 63 );
 		outp( 0x3c9, 63 );
 		outp( 0x3c9, 63 );
+#endif
 	}
 }
 
@@ -2759,6 +2810,10 @@ void game()
 				int save_w=Game_window_w,save_h=Game_window_h;
 				if ( Game_3dmax_flag )
 					game_3dmax_off();
+#ifdef SVRDOS32
+				if ( Game_simuleyes_flag )
+					SVRDos32SetRegistration(FALSE);
+#endif
 				do_automap(0);
 				Screen_mode=-1; set_screen_mode(SCREEN_GAME);
 				Game_window_w=save_w; Game_window_h=save_h;
@@ -2767,7 +2822,10 @@ void game()
 				last_drawn_cockpit[1] = -1;
 				if ( Game_3dmax_flag )
 					game_3dmax_on();
-
+#ifdef SVRDOS32
+				if ( Game_simuleyes_flag )
+					SVRDos32SetRegistration(TRUE);
+#endif
 				if (VR_screen_mode != SCREEN_MENU)
 					vr_reset_display();
 			}

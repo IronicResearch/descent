@@ -715,6 +715,10 @@ static char copyright[] = "DESCENT   COPYRIGHT (C) 1994,1995 PARALLAX SOFTWARE C
 
 #include "vers_id.h"
 
+#ifdef SVRDOS32
+#include "svrdos32.h"
+#endif
+
 extern int Game_simuleyes_flag;
 
 static const char desc_id_checksum_str[] = DESC_ID_CHKSUM;
@@ -1454,6 +1458,12 @@ int main(int argc,char **argv)
 
 		if ( FindArg( "-simuleyes" ))  {
 			Game_simuleyes_flag = 1;
+			VR_switch_eyes = 0;
+			VR_low_res = 0;
+			vr_mode = VR_INTERLACED;
+#ifdef SVRDOS32
+			SVRDos32Init();
+#endif
 		}
 
 		if (Game_simuleyes_flag)  {  // default to 320x400 (x200 per eye)
@@ -1718,6 +1728,11 @@ int main(int argc,char **argv)
 	if ( FindArg( "-showmeminfo" ) )
 //		show_mem_info = 1;		// Make memory statistics show
 	#endif
+
+#ifdef SVRDOS32
+	if (Game_simuleyes_flag)
+		SVRDos32Exit();
+#endif
 
 	return(0);		//presumably successful exit
 }
