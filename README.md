@@ -1,5 +1,4 @@
-# descent
-Descent 1.5 legacy
+# Descent 1.5 legacy
 
 Rebuilt the Descent 1.5 project with Watcom 10.x + MASM 6.1x.
 Some of the makefiles needed tweaking when using MSVC `make`.
@@ -9,6 +8,7 @@ Modified the makefile to at least clean all object and lib files via `make clean
 ```
   maked1
   dir main\descentr.exe
+  .. copy/move ..
   make clean
 ```
 When attempting to run the resulting DESCENTR.EXE, kept running into asset loading
@@ -33,13 +33,13 @@ alternate-line interleaved format, as used by Virtual-IO i-glasses HMD.
 
 Hence LCDBIOS was used by default Descent releases instead of StereoGraphics’
 own SVRDOS32 driver. LCDBIOS was later licensed to StereoGraphics for porting 
-into the SVRDOS32 driver, and also recompiled for DOS/4G as a replacement 
-called SIMBIOS. (LCDBIOS.EXE must be copied from the Destination Saturn CD.)
+into their SVRDOS32 driver, and also recompiled for DOS/4G as a replacement 
+called SIMBIOS. (LCDBIOS.EXE is located on the Destination Saturn CD.)
 
 SIMBIOS has the advantage of pre-emptively loading DOS/4G instead of DOS/4GW
 in order to fully handle interrupts in both protected mode and real mode to
-minimize unnecessary switching with external drivers. 
-SIMBIOS.EXE was available separately, and located in SIMBIOS.ZIP directory.
+improve responsiveness with external drivers. 
+(SIMBIOS.EXE was available separately from CD, and located in SIMBIOS.ZIP.)
 
 SVRDOS32 has the advantage of loading as a driver in the same process space
 as the calling app (Descent) instead of running as a parent process shell. 
@@ -53,15 +53,15 @@ SVRDOS32.DRV must be copied to the same directory as the Descent EXE.
 
 ## Runtime options for stereo modes:
 
-For running stereo modes with default LCDBIOS shell: 
+For running stereo modes with default LCDBIOS shell (LCDBIOS.EXE from CD): 
 
 	lcdbios -lcdrun:descentr.exe -lcdbios -simuleyes
 
-For running stereo modes with alternate SIMBIOS shell:
+For running stereo modes with alternate SIMBIOS shell (SIMBIOS.EXE from ZIP):
 
 	simbios -lcdrun:descentr.exe -lcdbios -simuleyes
 
-For running stereo modes with SVRDOS32.DRV driver in same path as Descent:
+For running stereo modes with SVRDOS32.DRV driver enabled (in EXE path):
 
 	Descentr -simuleyes
 
