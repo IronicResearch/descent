@@ -1463,6 +1463,8 @@ int main(int argc,char **argv)
 			vr_mode = VR_INTERLACED;
 #ifdef SVRDOS32
 			SVRDos32Init();
+			if (Game_3dmax_flag != 3)
+				Game_simuleyes_flag++;	// SVRDOS32 mode, not LCDBIOS mode
 #endif
 		}
 

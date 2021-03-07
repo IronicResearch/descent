@@ -1121,7 +1121,7 @@ int set_screen_mode(int sm)
 		}
 
 #ifdef SVRDOS32
-		if ( Game_simuleyes_flag ) {
+		if ( Game_simuleyes_flag  == 2 ) {
 			// set stereo page-flip compatible mode, via VESA or VGA mode X
 			switch (VR_screen_mode) {
 				case SM_320x400U:
@@ -1769,7 +1769,7 @@ game_render_frame_stereo_interlaced()
 
 #ifdef SVRDOS32
 	// updates stereo page-flipping with left/right image blits
-	if ( Game_simuleyes_flag ) {
+	if ( Game_simuleyes_flag == 2 ) {
 		int dx = (VR_eye_offset < 0) ? labs(VR_eye_offset) : 0;
 		SVRDos32SetImage(SVR_LEFT,  0, 0, dw-dx, dh, RenderCanvas[0].cv_bitmap.bm_data+dx);
 		SVRDos32SetImage(SVR_RIGHT,dx, 0, dw-dx, dh, RenderCanvas[1].cv_bitmap.bm_data);
@@ -2823,7 +2823,7 @@ void game()
 				if ( Game_3dmax_flag )
 					game_3dmax_on();
 #ifdef SVRDOS32
-				if ( Game_simuleyes_flag )
+				if ( Game_simuleyes_flag == 2 )
 					SVRDos32SetRegistration(TRUE);
 #endif
 				if (VR_screen_mode != SCREEN_MENU)
